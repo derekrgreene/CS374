@@ -43,7 +43,11 @@ int getSegmentData() {
     while (n < 2 || n > 10) {
         printf("Enter the number of spherical segments to evaluate [2-10]: \n");
         scanf("%d", &n);
-    } 
+        
+        if (n < 2 || n > 10) {
+            printf("Invalid input, out of range!");
+        }
+    }
 
 
     for (int i = 1; i <= n; i++) {
