@@ -62,6 +62,7 @@ int getSegmentData() {
         scanf("%f", &hb);
 
         printf("Entered data: R = %.2f ha = %.2f hb = %.2f.\n", r, ha, hb);
+        invalid = false;
         
         if (r < 0 || ha < 0 || hb < 0) {
             printf("Invalid Input: R = %.2f ha = %.2f hb = %.2f. Numbers must be positive real values.\n", r, ha, hb);
@@ -81,23 +82,22 @@ int getSegmentData() {
         }
         if (invalid && i > 0) {
             i--;
-            invalid = false;
+            continue;
 
-        } else {
-            a = sqrt((r * r) - (ha * ha));
-            b = sqrt((r * r) - (hb * hb));
-            h = ha - hb;    
-            tpsa = pi * b * b;
-            btsa = pi * a * a;
-            lsa = 2 * pi * r * h;
-            tsa = tpsa + btsa + lsa;
-            vol = 1.0/6.0 * pi * h * (3 * (a * a) + 3 * (b * b) + (h * h));
-            sum1 += tsa;
-            sum2 += vol;
+        } 
+        a = sqrt((r * r) - (ha * ha));
+        b = sqrt((r * r) - (hb * hb));
+        h = ha - hb;    
+        tpsa = pi * b * b;
+        btsa = pi * a * a;
+        lsa = 2 * pi * r * h;
+        tsa = tpsa + btsa + lsa;
+        vol = 1.0/6.0 * pi * h * (3 * (a * a) + 3 * (b * b) + (h * h));
+        sum1 += tsa;
+        sum2 += vol;
 
-            printf("Total Surface Area = %.2f Volume = %.2f.\n", tsa, vol);
+        printf("Total Surface Area = %.2f Volume = %.2f.\n", tsa, vol);
             
-        }
     }
     avgsa = sum1 / n;
     avgvol = sum2 / n;
