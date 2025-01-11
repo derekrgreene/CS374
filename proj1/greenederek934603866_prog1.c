@@ -32,28 +32,19 @@ float pi = 3.14159265359;
 bool invalid = false;
 
 
-int getSegmentNum(void);
-int getSegmentData(int n);
+int getSegmentData();
 
 
-int getSegmentNum(void) {
-/* Function to get segment num from user
- * Parameters: None
- * Returns: int n
+int getSegmentData() {
+/* Function to get and validate radius and heights, also calculates total and avg area/volume
+ * Parameters: int n
+ * Returns: None
  */
     while (n < 2 || n > 10) {
         printf("Enter the number of spherical segments to evaluate [2-10]: ");
         scanf("%d", &n);
     }
-    return n;
-}
 
-
-int getSegmentData(int n) {
-/* Function to get and validate radius and heights, also calculates total and avg area/volume
- * Parameters: int n
- * Returns: None
- */
     for (int i = 1; i <= n; i++) {
         printf("Obtaining data for spherical sgement number %d\n", i);
         printf("What is the radius of the sphere (R)?: ");
@@ -111,6 +102,6 @@ int getSegmentData(int n) {
 
 
 int main(void) {
-    getSegmentData(getSegmentNum());
+    getSegmentData();
     
 }
