@@ -26,8 +26,8 @@ float tsa;
 float vol;
 float avgsa;
 float avgvol;
-float sum1;
-float sum2;
+float sum1 = 0;
+float sum2 = 0;
 float pi = 3.14159265359;
 bool invalid = false;
 
@@ -41,9 +41,10 @@ int getSegmentData() {
  * Returns: None
  */
     while (n < 2 || n > 10) {
-        printf("Enter the number of spherical segments to evaluate [2-10]: ");
+        printf("Enter the number of spherical segments to evaluate [2-10]: \n");
         scanf("%d", &n);
-    }
+    } 
+
 
     for (int i = 1; i <= n; i++) {
         printf("Obtaining data for spherical sgement number %d\n", i);
