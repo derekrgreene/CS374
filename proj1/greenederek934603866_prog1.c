@@ -32,23 +32,11 @@ float pi = 3.14159265359;
 bool invalid = false;
 
 
-int getSegmentData();
-
-
-int getSegmentData() {
-/* Function to get and validate radius and heights, also calculates total and avg area/volume
- * Parameters: int n
- * Returns: None
- */
+int main(void) {
     while (n < 2 || n > 10) {
-        printf("Enter the number of spherical segments to evaluate [2-10]: \n");
-        scanf("%d", &n);
-        
-        if (n < 2 || n > 10) {
-            printf("Invalid input, out of range!");
+    printf("Enter the number of spherical segments to evaluate [2-10]: \n");
+    scanf("%d", &n);
         }
-    }
-
 
     for (int i = 1; i <= n; i++) {
         printf("Obtaining data for spherical sgement number %d\n", i);
@@ -103,10 +91,4 @@ int getSegmentData() {
     avgvol = sum2 / n;
 
     printf("Total average results:\n Average Surface Area = %.2f Average Volume = %.2f.", avgsa, avgvol);
-}
-
-
-int main(void) {
-    getSegmentData();
-    
 }
