@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 
-int n = 0;
+float n = 0;
 float r;
 float a;
 float b;
@@ -35,7 +35,7 @@ bool invalid = false;
 int main(void) {
     while (n < 2 || n > 10) {
     printf("Enter the number of spherical segments to evaluate [2-10]: \n");
-    scanf("%d", &n);
+    scanf("%f", &n);
         }
 
     for (int i = 1; i <= n; i++) {
