@@ -12,7 +12,7 @@
 #include <stdbool.h>
 
 
-float n = 0;
+int n = 0;
 float r;
 float a;
 float b;
@@ -26,31 +26,46 @@ float tsa;
 float vol;
 float avgsa;
 float avgvol;
-float sum1 = 0;
-float sum2 = 0;
+float sum1;
+float sum2;
 float pi = 3.14159265359;
 bool invalid = false;
 
 
-int main(void) {
-    while (n < 2 || n > 10) {
-    printf("Enter the number of spherical segments to evaluate [2-10]: \n");
-    scanf("%f", &n);
-        }
+int getSegmentNum(void);
+int getSegmentData(int n);
 
+
+int getSegmentNum(void) {
+/* Function to get segment num from user
+ * Parameters: None
+ * Returns: int n
+ */
+    while (n < 2 || n > 10) {
+        printf("How many spherical segments you want to evaluate [2-10]?\n");
+        scanf("%d", &n);
+    }
+    return n;
+}
+
+
+int getSegmentData(int n) {
+/* Function to get and validate radius and heights, also calculates total and avg area/volume
+ * Parameters: int n
+ * Returns: None
+ */
     for (int i = 1; i <= n; i++) {
-        printf("Obtaining data for spherical sgement number %d\n", i);
-        printf("What is the radius of the sphere (R)?: ");
+        printf("Obtaining data for spherical segment number %d\n", i);
+        printf("What is the radius of the sphere (R)?\n");
         scanf("%f", &r);
 
-        printf("What is the height of the top area of the spherical segment (ha)?: ");
+        printf("What is the height of the top area of the spherical segment (ha)?\n");
         scanf("%f", &ha);
 
-        printf("What is the height of the bottom area of the spherical segment (hb)?: ");
+        printf("What is the height of the bottom area of the spherical segment (hb)?\n");
         scanf("%f", &hb);
 
         printf("Entered data: R = %.2f ha = %.2f hb = %.2f.\n", r, ha, hb);
-        invalid = false;
         
         if (r < 0 || ha < 0 || hb < 0) {
             printf("Invalid Input: R = %.2f ha = %.2f hb = %.2f. Numbers must be positive real values.\n", r, ha, hb);
@@ -70,25 +85,32 @@ int main(void) {
         }
         if (invalid && i > 0) {
             i--;
-            continue;
+            invalid = false;
 
-        } 
-        a = sqrt((r * r) - (ha * ha));
-        b = sqrt((r * r) - (hb * hb));
-        h = ha - hb;    
-        tpsa = pi * b * b;
-        btsa = pi * a * a;
-        lsa = 2 * pi * r * h;
-        tsa = tpsa + btsa + lsa;
-        vol = 1.0/6.0 * pi * h * (3 * (a * a) + 3 * (b * b) + (h * h));
-        sum1 += tsa;
-        sum2 += vol;
+        } else {
+            a = sqrt((r * r) - (ha * ha));
+            b = sqrt((r * r) - (hb * hb));
+            h = ha - hb;    
+            tpsa = pi * b * b;
+            btsa = pi * a * a;
+            lsa = 2 * pi * r * h;
+            tsa = tpsa + btsa + lsa;
+            vol = 1.0/6.0 * pi * h * (3 * (a * a) + 3 * (b * b) + (h * h));
+            sum1 += tsa;
+            sum2 += vol;
 
-        printf("Total Surface Area = %.2f Volume = %.2f.\n", tsa, vol);
+            printf("Total Surface Area = %.2f Volume = %.2f.\n", tsa, vol);
             
+        }
     }
     avgsa = sum1 / n;
     avgvol = sum2 / n;
 
     printf("Total average results:\n Average Surface Area = %.2f Average Volume = %.2f.", avgsa, avgvol);
+}
+
+
+int main(void) {
+    getSegmentData(getSegmentNum());
+    
 }
