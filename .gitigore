@@ -7,3 +7,7 @@ debian
 /movies/
 movies*
 /movies*
+venv*
+*venv
+venv
+/venv
