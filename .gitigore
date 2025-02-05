@@ -1,5 +1,9 @@
-debian
+debian/
 /debian
-movies
+movies/
 /movies
-
+movies
+debian
+/movies/
+movies*
+/movies*
