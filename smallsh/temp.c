@@ -85,6 +85,23 @@ int builtin_commands(struct command_line *curr_command){
 }
 
 
+void handleCommand(struct command_line *curr_command){}
+  pid_t spawnPid = fork();
+  
+  switch(spawnPid) {
+  case -1:
+    perror("fork()\n");
+    exit(1);
+    break;
+  case 0:
+    execvp(curr_command->argv[0], curr_command->argv);
+    perror("execvp");
+    exit(2);
+    break;
+  default:
+    spawnPid = waitpid(spawnPid, &status, 0);
+}
+
 
 int main(){
   struct command_line *curr_command;
@@ -95,6 +112,8 @@ int main(){
     }
     if (builtin_commands(curr_command)){
       continue;
+    } else {  
+        handleCommand(curr_command);  
     }
 
 
