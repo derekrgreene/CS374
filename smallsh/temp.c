@@ -134,7 +134,7 @@ void handleCommand(struct command_line *curr_command) {
         inputOutput(curr_command);
         execvp(curr_command->argv[0], curr_command->argv);
         perror("execvp");
-        exit(2);
+        exit(1);
         break;
     default:
         if (curr_command->is_bg) {
