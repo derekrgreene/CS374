@@ -16,6 +16,9 @@
 #define MAX_ARGS 512
 
 int status = 0;
+pid_t bgPids[MAX_ARGS];
+int bgPid_count = 0;
+
 struct command_line {
   char *argv[MAX_ARGS + 1];
   int argc;
@@ -118,8 +121,29 @@ void inputOutput(struct command_line *curr_command){
     }
     close(output);
   }
+  if (curr_command->is_bg){
+    if (curr_command->input_file == NULL){
+      int input = open("dev/null", O_RDONLY);
+      int result = dup2(input, STDIN_FILENO);
+      if (result == -1) {
+        perror("dup2()");
+        status = 1;
+        return;
+      }
+      close(input);
+    }
+    if (curr_command->output_file == NULL){
+      int output = open("dev/null", O_WRONLY);
+      int result = dup2(output, STDOUT_FILENO);
+      if (result == -1) {
+        perror("dup2()");
+        status = 1;
+        return;
+      }
+      close(output);
+    }
+  }
 }
-
 
 void handleCommand(struct command_line *curr_command) {
     pid_t spawnPid = fork();
