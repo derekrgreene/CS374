@@ -162,7 +162,7 @@ int main() {
     //printf("Command Parsed: ");
     //for (int i = 0; i < curr_command->argc; i++) {
     //  printf("%s ", curr_command->argv[i]);
-    }
+    //}
     //printf("\n");
   }
   return EXIT_SUCCESS;
