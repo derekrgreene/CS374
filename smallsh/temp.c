@@ -123,7 +123,7 @@ void inputOutput(struct command_line *curr_command){
   }
   if (curr_command->is_bg){
     if (curr_command->input_file == NULL){
-      int input = open("dev/null", O_RDONLY);
+      int input = open("/dev/null", O_RDONLY);
       int result = dup2(input, STDIN_FILENO);
       if (result == -1) {
         perror("dup2()");
@@ -133,7 +133,7 @@ void inputOutput(struct command_line *curr_command){
       close(input);
     }
     if (curr_command->output_file == NULL){
-      int output = open("dev/null", O_WRONLY);
+      int output = open("/dev/null", O_WRONLY);
       int result = dup2(output, STDOUT_FILENO);
       if (result == -1) {
         perror("dup2()");
@@ -169,6 +169,13 @@ void handleCommand(struct command_line *curr_command) {
     }
 }
 
+void checkBgPids(int signum){
+  pid_t pid;
+  int exitStatus;
+
+  while ((pid = waitpid(-1, &exitStatus, WNOHANG)) > 0) {
+  }
+}
 
 int main() {
   struct command_line *curr_command;
