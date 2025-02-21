@@ -1,19 +1,20 @@
 /**
-* A sample program for parsing a command line. If you find it useful,
-* feel free to adapt this code for Assignment 4.
-* Do fix memory leaks and any additional issues you find.
-*/
-#include <stdio.h>
+ * A sample program for parsing a command line. If you find it useful,
+ * feel free to adapt this code for Assignment 4.
+ * Do fix memory leaks and any additional issues you find.
+ */
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #define INPUT_LENGTH 2048
 #define MAX_ARGS 512
 
-
 int status = 0;
-struct command_line{
+struct command_line {
   char *argv[MAX_ARGS + 1];
   int argc;
   char *input_file;
@@ -21,108 +22,109 @@ struct command_line{
   bool is_bg;
 };
 
-struct command_line *parse_input(){
+struct command_line *parse_input() {
   char input[INPUT_LENGTH];
-  struct command_line *curr_command = (struct command_line *) calloc(1, sizeof(struct command_line));
+  struct command_line *curr_command =
+      (struct command_line *)calloc(1, sizeof(struct command_line));
 
   // Get input
   printf(": ");
   fflush(stdout);
-  if (fgets(input, INPUT_LENGTH, stdin) == NULL){
+  if (fgets(input, INPUT_LENGTH, stdin) == NULL) {
     free(curr_command);
     return NULL;
   }
   // Handle comments
-  if (input[0] == '#'){
+  if (input[0] == '#') {
     free(curr_command);
     return NULL;
   }
   // handle blank lines
-  if (input[0] == '\n'){
+  if (input[0] == '\n') {
     free(curr_command);
     return NULL;
   }
 
-
-    // Tokenize the input
+  // Tokenize the input
   char *token = strtok(input, " \n");
 
-  while(token){
-    if(!strcmp(token,"<")){
-      curr_command->input_file = strdup(strtok(NULL," \n"));
-    } else if(!strcmp(token,">")){
-        curr_command->output_file = strdup(strtok(NULL," \n"));
-    } else if(!strcmp(token,"&")){
-        if (strtok(NULL, "\n") == NULL){
+  while (token) {
+    if (!strcmp(token, "<")) {
+      curr_command->input_file = strdup(strtok(NULL, " \n"));
+    } else if (!strcmp(token, ">")) {
+      curr_command->output_file = strdup(strtok(NULL, " \n"));
+    } else if (!strcmp(token, "&")) {
+      if (strtok(NULL, "\n") == NULL) {
         curr_command->is_bg = true;
-    } else{
+      } else {
         curr_command->argv[curr_command->argc++] = strdup(token);
+      }
+    } else {
+      curr_command->argv[curr_command->argc++] = strdup(token);
     }
-    } else{
-        curr_command->argv[curr_command->argc++] = strdup(token);
-    }
-    token=strtok(NULL," \n");
+    token = strtok(NULL, " \n");
   }
   return curr_command;
 }
 
-int builtin_commands(struct command_line *curr_command){
-  if(!strcmp(curr_command->argv[0],"exit")){
+int builtin_commands(struct command_line *curr_command) {
+  if (!strcmp(curr_command->argv[0], "exit")) {
     exit(0);
     return 1;
-  } else if(!strcmp(curr_command->argv[0],"cd")){
-        if (curr_command->argc == 1){
-          chdir(getenv("HOME"));
-        } else {
-          chdir(curr_command->argv[1]);
-        }
-        return 1;
-      } else if (!strcmp(curr_command->argv[0],"status")){
-            printf("exit value %d\n", status);
-            return 1;
-          }
+  } else if (!strcmp(curr_command->argv[0], "cd")) {
+    if (curr_command->argc == 1) {
+      chdir(getenv("HOME"));
+    } else {
+      chdir(curr_command->argv[1]);
+    }
+    return 1;
+  } else if (!strcmp(curr_command->argv[0], "status")) {
+    printf("exit value %d\n", status);
+    return 1;
+  }
   return 0;
 }
 
+void handleCommand(struct command_line *curr_command) {
+    pid_t spawnPid = fork();
 
-void handleCommand(struct command_line *curr_command){}
-  pid_t spawnPid = fork();
-  
-  switch(spawnPid) {
-  case -1:
-    perror("fork()\n");
-    exit(1);
-    break;
-  case 0:
-    execvp(curr_command->argv[0], curr_command->argv);
-    perror("execvp");
-    exit(2);
-    break;
-  default:
-    spawnPid = waitpid(spawnPid, &status, 0);
+    switch(spawnPid) {
+    case -1:
+        perror("fork()\n");
+        exit(1);
+        break;
+    case 0:
+        execvp(curr_command->argv[0], curr_command->argv);
+        perror("execvp");
+        exit(2);
+        break;
+    default:
+        if (curr_command->is_bg) {
+            return;
+        } else {
+        spawnPid = waitpid(spawnPid, &status, 0);
+        }
+    }
 }
 
-
-int main(){
+int main() {
   struct command_line *curr_command;
-  while(true){
+  while (true) {
     curr_command = parse_input();
-    if (curr_command == NULL){
+    if (curr_command == NULL) {
       continue;
     }
-    if (builtin_commands(curr_command)){
+    if (builtin_commands(curr_command)) {
       continue;
-    } else {  
-        handleCommand(curr_command);  
+    } else {
+      handleCommand(curr_command);
     }
-
 
     printf("Command Parsed: ");
-    for (int i = 0; i < curr_command->argc; i++){
+    for (int i = 0; i < curr_command->argc; i++) {
       printf("%s ", curr_command->argv[i]);
     }
     printf("\n");
-
   }
-return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
