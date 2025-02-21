@@ -94,6 +94,7 @@ void handleCommand(struct command_line *curr_command) {
         exit(1);
         break;
     case 0:
+        inputOutput(curr_command);
         execvp(curr_command->argv[0], curr_command->argv);
         perror("execvp");
         exit(2);
@@ -106,6 +107,40 @@ void handleCommand(struct command_line *curr_command) {
         }
     }
 }
+
+void inputOutput(struct command_line *curr_command){
+  if (curr_command->input_file != NULL) {
+    int input = open(curr_command->input_file, O_RDONLY);
+    if (input == -1) {
+      perror("open()");
+      status = 1;
+      return;
+    }
+    int result = dup2(input, STDIN_FILENO);
+    if (result == -1) {
+      perror("dup2()");
+      status = 1;
+      return;
+    }
+    close(input);
+  }
+  if (curr_command->output_file != NULL){
+    int output = open(curr_command->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (output == -1) {
+      perror("open()");
+      status = 1;
+      return;
+    }
+    int result = dup2(output, STDOUT_FILENO);
+    if (result == -1) {
+      perror("dup2()");
+      status = 1;
+      return;
+    }
+    close(output);
+  }
+}
+
 
 int main() {
   struct command_line *curr_command;
@@ -120,11 +155,11 @@ int main() {
       handleCommand(curr_command);
     }
 
-    printf("Command Parsed: ");
-    for (int i = 0; i < curr_command->argc; i++) {
-      printf("%s ", curr_command->argv[i]);
+    //printf("Command Parsed: ");
+    //for (int i = 0; i < curr_command->argc; i++) {
+    //  printf("%s ", curr_command->argv[i]);
     }
-    printf("\n");
+    //printf("\n");
   }
   return EXIT_SUCCESS;
 }
