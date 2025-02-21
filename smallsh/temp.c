@@ -174,11 +174,16 @@ void checkBgPids(int signum){
   int exitStatus;
 
   while ((pid = waitpid(-1, &exitStatus, WNOHANG)) > 0) {
-    printf("background pid %d is done: terminated by signal %d\n", WTERMSIG(exitStatus));
+    printf("background pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
   }
 }
 
 int main() {
+  struct sigaction SIGINT_action;
+  SIGINT_action.sa_handler = checkBgPids;
+  SIGINT_action.sa_flags = SA_RESTART;
+  sigaction(SIGCHLD, &SIGINT_action, NULL);
+
   struct command_line *curr_command;
   while (true) {
     curr_command = parse_input();
@@ -190,12 +195,6 @@ int main() {
     } else {
       handleCommand(curr_command);
     }
-
-    //printf("Command Parsed: ");
-    //for (int i = 0; i < curr_command->argc; i++) {
-    //  printf("%s ", curr_command->argv[i]);
-    //}
-    //printf("\n");
   }
   return EXIT_SUCCESS;
 }
