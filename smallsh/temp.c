@@ -141,6 +141,7 @@ void handleCommand(struct command_line *curr_command) {
             return;
         } else {
         spawnPid = waitpid(spawnPid, &status, 0);
+        status = WEXITSTATUS(status);
         }
     }
 }
