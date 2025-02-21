@@ -16,8 +16,6 @@
 #define MAX_ARGS 512
 
 int status = 0;
-pid_t bgPids[MAX_ARGS];
-int bgPid_count = 0;
 
 struct command_line {
   char *argv[MAX_ARGS + 1];
@@ -161,6 +159,7 @@ void handleCommand(struct command_line *curr_command) {
         break;
     default:
         if (curr_command->is_bg) {
+            printf("background pid is %d\n", spawnPid);
             return;
         } else {
         spawnPid = waitpid(spawnPid, &status, 0);
@@ -174,10 +173,16 @@ void checkBgPids(int signum){
   int exitStatus;
 
   while ((pid = waitpid(-1, &exitStatus, WNOHANG)) > 0) {
-    printf("background pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
-    // flush stdout to ensure ':' is printed when return control to shell
+    if (WIFEXITED(exitStatus)) {
+      printf("\nbackground pid %d is done: exit value %d\n", pid, WEXITSTATUS(exitStatus));
+      printf(": ");
+      fflush(stdout);
+    } else {
+    printf("\nbackground pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
+    printf(": ");
+    fflush(stdout);
+    }
   }
-  fflush(stdout);
 }
 
 int main() {
