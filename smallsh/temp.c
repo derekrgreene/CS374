@@ -132,7 +132,7 @@ void handleCommand(struct command_line *curr_command) {
     case 0:
         inputOutput(curr_command);
         execvp(curr_command->argv[0], curr_command->argv);
-        perror("execvp");
+        perror("%s: no such file or directory\n", curr_command->argv[0]);
         exit(1);
         break;
     default:
