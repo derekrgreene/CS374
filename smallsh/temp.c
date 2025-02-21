@@ -175,6 +175,8 @@ void checkBgPids(int signum){
 
   while ((pid = waitpid(-1, &exitStatus, WNOHANG)) > 0) {
     printf("background pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
+    // flush stdout to ensure ':' is printed when return control to shell
+    fflush(stdout);
   }
 }
 
