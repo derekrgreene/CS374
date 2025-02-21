@@ -85,28 +85,6 @@ int builtin_commands(struct command_line *curr_command) {
   return 0;
 }
 
-void handleCommand(struct command_line *curr_command) {
-    pid_t spawnPid = fork();
-
-    switch(spawnPid) {
-    case -1:
-        perror("fork()\n");
-        exit(1);
-        break;
-    case 0:
-        inputOutput(curr_command);
-        execvp(curr_command->argv[0], curr_command->argv);
-        perror("execvp");
-        exit(2);
-        break;
-    default:
-        if (curr_command->is_bg) {
-            return;
-        } else {
-        spawnPid = waitpid(spawnPid, &status, 0);
-        }
-    }
-}
 
 void inputOutput(struct command_line *curr_command){
   if (curr_command->input_file != NULL) {
@@ -139,6 +117,30 @@ void inputOutput(struct command_line *curr_command){
     }
     close(output);
   }
+}
+
+
+void handleCommand(struct command_line *curr_command) {
+    pid_t spawnPid = fork();
+
+    switch(spawnPid) {
+    case -1:
+        perror("fork()\n");
+        exit(1);
+        break;
+    case 0:
+        inputOutput(curr_command);
+        execvp(curr_command->argv[0], curr_command->argv);
+        perror("execvp");
+        exit(2);
+        break;
+    default:
+        if (curr_command->is_bg) {
+            return;
+        } else {
+        spawnPid = waitpid(spawnPid, &status, 0);
+        }
+    }
 }
 
 
