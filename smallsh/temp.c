@@ -174,6 +174,7 @@ void checkBgPids(int signum){
   int exitStatus;
 
   while ((pid = waitpid(-1, &exitStatus, WNOHANG)) > 0) {
+    printf("background pid %d is done: terminated by signal %d\n", WTERMSIG(exitStatus));
   }
 }
 
