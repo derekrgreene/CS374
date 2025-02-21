@@ -92,13 +92,12 @@ void inputOutput(struct command_line *curr_command){
   if (curr_command->input_file != NULL) {
     int input = open(curr_command->input_file, O_RDONLY);
     if (input == -1) {
-      perror("open()");
+      printf("cannot open %s for input\n", curr_command->input_file);
       status = 1;
       return;
     }
     int result = dup2(input, STDIN_FILENO);
     if (result == -1) {
-      perror("dup2()");
       status = 1;
       return;
     }
