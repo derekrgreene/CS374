@@ -152,6 +152,11 @@ void handleCommand(struct command_line *curr_command) {
         exit(1);
         break;
     case 0:
+        if (curr_command->is_bg) {
+            signal(SIGINT, SIG_IGN);
+        } else {
+          signal(SIGINT, SIG_DFL);
+        }
         inputOutput(curr_command);
         execvp(curr_command->argv[0], curr_command->argv);
         fprintf(stderr, "%s: no such file or directory\n", curr_command->argv[0]);
@@ -162,6 +167,11 @@ void handleCommand(struct command_line *curr_command) {
             printf("background pid is %d\n", spawnPid);
             return;
         } else {
+          if (WIFSIGNALED(status)){
+            printf("terminated by signal %d\n", WTERMSIG(status));
+          } else {
+            status = WEXITSTATUS(status);
+          }
         spawnPid = waitpid(spawnPid, &status, 0);
         status = WEXITSTATUS(status);
         }
