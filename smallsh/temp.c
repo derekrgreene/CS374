@@ -16,6 +16,7 @@
 #define MAX_ARGS 512
 
 int status = 0;
+bool foregroundOnly = false;
 
 struct command_line {
   char *argv[MAX_ARGS + 1];
@@ -144,15 +145,22 @@ void inputOutput(struct command_line *curr_command){
 }
 
 void handleCommand(struct command_line *curr_command) {
-    pid_t spawnPid = fork();
+    if (foregroundOnly) {
+      curr_command->is_bg = false;
+    }
 
+    pid_t spawnPid = fork();
     switch(spawnPid) {
     case -1:
         perror("fork()\n");
         exit(1);
         break;
     case 0:
-        if (curr_command->is_bg) {
+        struct sigaction SIGTSTP_action = {0};
+        SIGTSTP_action.sa_handler = SIG_IGN;
+        sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+
+        if (curr_command->is_bg && !foregroundOnly) {
             signal(SIGINT, SIG_IGN);
         } else {
           signal(SIGINT, SIG_DFL);
@@ -163,20 +171,25 @@ void handleCommand(struct command_line *curr_command) {
         exit(1);
         break;
     default:
-        if (curr_command->is_bg) {
+        if (curr_command->is_bg && !foregroundOnly) {
             printf("background pid is %d\n", spawnPid);
+            curr_command->is_bg = false;
             return;
         } else {
-          if (WIFSIGNALED(status)){
-            printf("terminated by signal %d\n", WTERMSIG(status));
+          int childStatus;
+          int fg_pid = spawnPid;
+          pid_t donePid = waitpid(spawnPid, &childStatus, 0);
+          fg_pid = 0;
+          if (WIFSIGNALED(childStatus)){
+            printf("terminated by signal %d\n", WTERMSIG(childStatus));
           } else {
-            status = WEXITSTATUS(status);
+            status = WEXITSTATUS(childStatus);
           }
-        spawnPid = waitpid(spawnPid, &status, 0);
-        status = WEXITSTATUS(status);
         }
     }
 }
+
+pid_t fg_pid = 0;
 
 void checkBgPids(int signum){
   pid_t pid;
@@ -188,14 +201,33 @@ void checkBgPids(int signum){
       printf(": ");
       fflush(stdout);
     } else {
-    printf("\nbackground pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
-    printf(": ");
-    fflush(stdout);
+      printf("\nbackground pid %d is done: terminated by signal %d\n", pid, WTERMSIG(exitStatus));
+      printf(": ");
+      fflush(stdout);
     }
   }
 }
 
+void foregroundBackground(int signum) {
+  if (fg_pid > 0) {
+    bool switchMode = true;
+    return;
+  }
+  if (!foregroundOnly) {
+    foregroundOnly = true;
+    char *output = "\nEntering foreground-only mode (& is now ignored)";
+    write(STDOUT_FILENO, output, strlen(output));
+  } else {
+    foregroundOnly = false;
+    char *output = "\nExiting foreground-only mode";
+    write(STDOUT_FILENO, output, strlen(output));
+  }
+  char *output = "\n: ";
+  write(STDOUT_FILENO, output, strlen(output));
+}
+
 int main() {
+  bool switchMode = false;
   struct sigaction SIGINT_action;
   SIGINT_action.sa_handler = SIG_IGN;
   SIGINT_action.sa_flags = SA_RESTART;
@@ -206,16 +238,27 @@ int main() {
   SIGCHLD_action.sa_flags = SA_RESTART;
   sigaction(SIGCHLD, &SIGCHLD_action, NULL);
 
+  struct sigaction SIGTSTP_action;
+  SIGTSTP_action.sa_handler = foregroundBackground;
+  SIGTSTP_action.sa_flags = SA_RESTART;
+  sigaction(SIGTSTP, &SIGTSTP_action, NULL);
+
   struct command_line *curr_command;
   while (true) {
     curr_command = parse_input();
+    if (switchMode) {
+      foregroundBackground(SIGTSTP);
+      switchMode = false;
+    }
     if (curr_command == NULL) {
       continue;
     }
     if (builtin_commands(curr_command)) {
+      free(curr_command);
       continue;
     } else {
       handleCommand(curr_command);
+      free(curr_command);
     }
   }
   return EXIT_SUCCESS;
