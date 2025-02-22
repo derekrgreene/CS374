@@ -187,9 +187,14 @@ void checkBgPids(int signum){
 
 int main() {
   struct sigaction SIGINT_action;
-  SIGINT_action.sa_handler = checkBgPids;
+  SIGINT_action.sa_handler = SIG_IGN;
   SIGINT_action.sa_flags = SA_RESTART;
-  sigaction(SIGCHLD, &SIGINT_action, NULL);
+  sigaction(SIGINT, &SIGINT_action, NULL);
+
+  struct sigaction SIGCHLD_action;
+  SIGCHLD_action.sa_handler = checkBgPids;
+  SIGCHLD_action.sa_flags = SA_RESTART;
+  sigaction(SIGCHLD, &SIGCHLD_action, NULL);
 
   struct command_line *curr_command;
   while (true) {
