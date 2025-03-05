@@ -1,3 +1,8 @@
 debian/
-movies/
-
+.cache/
+.config/
+.local/
+.ssh/
+.bash*
+.profile
+.vimrc
