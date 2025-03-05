@@ -6,3 +6,4 @@ debian/
 .bash*
 .profile
 .vimrc
+venv/
