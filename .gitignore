@@ -10,3 +10,4 @@ venv/
 movies/venv/
 *.csv
 smallsh/greene*
+*.zip
